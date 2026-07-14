@@ -1,0 +1,1027 @@
+﻿from __future__ import annotations
+
+import asyncio
+import json
+import logging
+from collections.abc import Awaitable, Callable
+from datetime import datetime
+
+import httpx
+
+from app.queue.task_queue import TaskQueue
+from app.router.task_router import TaskRouter, TaskRouterError
+from app.schemas.context import ContextStore, ErrorRecord, IdempotencyRecord, TokenUsage, ToolCallRecord
+from app.schemas.executor import ExecutorErrorDetail, TaskExecutionResult
+from app.schemas.router import ToolRouteDecision
+from app.schemas.task import TaskModel, TaskStatus, utc_now
+from app.schemas.tool import ToolResult
+from app.utils import configure_runtime_logger, runtime_log, runtime_progress
+
+
+FAIL_FAST_TOOL_NAME = "text_generate_tool"
+FAIL_FAST_LLM_TIMEOUT_SECONDS = 45
+FAIL_FAST_TOOL_TIMEOUT_SECONDS = 75
+FAIL_FAST_EXECUTOR_TIMEOUT_SECONDS = 90
+REASON_TOOL_NAME = "llm_reason_tool"
+REASON_LLM_TIMEOUT_SECONDS = 45
+REASON_TOOL_TIMEOUT_SECONDS = 75
+REASON_EXECUTOR_TIMEOUT_SECONDS = 90
+REASON_MAX_RECOVERABLE_RETRIES = 1
+
+
+class TaskExecutorError(Exception):
+    def __init__(self, error: ExecutorErrorDetail) -> None:
+        super().__init__(error.message)
+        self.error = error
+
+
+class TaskExecutor:
+    def __init__(
+        self,
+        *,
+        context: ContextStore,
+        queue: TaskQueue,
+        router: TaskRouter,
+        result_context_key: str = "task_execution_results",
+        checkpoint_saver: Callable[[str, dict[str, object] | None], Awaitable[None]] | None = None,
+        result_callback: Callable[[TaskExecutionResult], Awaitable[None]] | None = None,
+    ) -> None:
+        self.context = context
+        self.queue = queue
+        self.router = router
+        self.result_context_key = result_context_key
+        self.checkpoint_saver = checkpoint_saver
+        self.result_callback = result_callback
+        self._lock = asyncio.Lock()
+        self.logger = configure_runtime_logger()
+
+    async def execute_ready_tasks(self, limit: int | None = None) -> list[TaskExecutionResult]:
+        ready_tasks = await self.queue.get_ready_tasks(limit=limit)
+        if not ready_tasks:
+            return []
+
+        results = await asyncio.gather(*(self.execute_task(task.task_id) for task in ready_tasks))
+        for result in results:
+            if self.result_callback is not None:
+                await self.result_callback(result)
+        return list(results)
+
+    async def execute_task(self, task_id: str) -> TaskExecutionResult:
+        task = self._get_task(task_id)
+        self.context.ensure_task_runtime_values(task)
+
+        recovered_result = await self._try_restore_from_idempotency(task)
+        if recovered_result is not None:
+            return recovered_result
+
+        execution_started_at = utc_now()
+        task_started_at = datetime.now()
+        route_decision: ToolRouteDecision | None = None
+        routed_tool_name: str | None = None
+        attempt_key = self._build_attempt_key(task)
+
+        await self.queue.mark_task_running(task_id)
+        task = self._get_task(task_id)
+        runtime_log(
+            layer="executor",
+            event="execute",
+            data={
+                "task_id": task.task_id,
+                "tool": task.tool,
+                "depends_on": list(task.depends_on),
+                "attempt": task.retry_count + 1,
+                "attempt_key": attempt_key,
+                "idempotency_key": task.idempotency_key,
+            },
+            logger=self.logger,
+        )
+        runtime_progress(step=f"task:{task.task_id}", status="鎵ц涓?, detail=f"宸ュ叿={task.tool} 绗瑊task.retry_count + 1}娆?)
+
+        try:
+            tool, route_decision = await self.router.route_task(task)
+            routed_tool_name = tool.name
+            runtime_log(
+                layer="executor",
+                event="route",
+                data={
+                    "task_id": task.task_id,
+                    "requested_tool": route_decision.requested_tool,
+                    "selected_tool": route_decision.selected_tool,
+                    "routing_mode": route_decision.routing_mode,
+                    "reason": route_decision.reason,
+                    "failover_chain": route_decision.failover_chain,
+                },
+                logger=self.logger,
+            )
+            runtime_progress(
+                step=f"task:{task.task_id}",
+                status="璺敱瀹屾垚",
+                detail=f"妯″紡={route_decision.routing_mode} | 宸ュ叿={route_decision.selected_tool} | {route_decision.reason}",
+            )
+        except TaskRouterError as exc:
+            return await self._handle_failure(
+                task=task,
+                attempt_key=attempt_key,
+                error_message=exc.error.message,
+                final_status=TaskStatus.FAILED,
+                route_decision=route_decision,
+                routed_tool_name=routed_tool_name,
+                tool_result=None,
+                started_at=execution_started_at,
+            )
+
+        tool_payload = self._build_tool_payload(task, tool_name=tool.name, tool_timeout=tool.timeout)
+        effective_timeout = int(tool_payload.get("executor_timeout_seconds", task.timeout))
+
+        try:
+            tool_result = await asyncio.wait_for(
+                tool.arun(payload=tool_payload, context=self.context),
+                timeout=effective_timeout,
+            )
+        except asyncio.TimeoutError:
+            timeout_message = f"浠诲姟 '{task.task_id}' 瓒呮椂锛岃秴杩?{effective_timeout} 绉掋€?
+            runtime_log(
+                layer="executor",
+                event="timeout",
+                data={
+                    "task_id": task.task_id,
+                    "tool": routed_tool_name,
+                    "timeout_seconds": effective_timeout,
+                    "attempt": task.retry_count + 1,
+                    "attempt_key": attempt_key,
+                    "idempotency_key": task.idempotency_key,
+                },
+                latency_ms=(datetime.now() - task_started_at).total_seconds() * 1000,
+                logger=self.logger,
+            )
+            return await self._handle_failure(
+                task=task,
+                attempt_key=attempt_key,
+                error_message=timeout_message,
+                final_status=TaskStatus.TIMEOUT,
+                route_decision=route_decision,
+                routed_tool_name=routed_tool_name,
+                tool_result=None,
+                started_at=execution_started_at,
+                failure_exception=asyncio.TimeoutError(timeout_message),
+            )
+        except Exception as exc:
+            runtime_log(
+                layer="executor",
+                event="error",
+                data={
+                    "task_id": task.task_id,
+                    "tool": routed_tool_name,
+                    "error": str(exc),
+                    "attempt": task.retry_count + 1,
+                    "attempt_key": attempt_key,
+                    "idempotency_key": task.idempotency_key,
+                },
+                latency_ms=(datetime.now() - task_started_at).total_seconds() * 1000,
+                level=logging.ERROR,
+                logger=self.logger,
+            )
+            return await self._handle_failure(
+                task=task,
+                attempt_key=attempt_key,
+                error_message=str(exc),
+                final_status=TaskStatus.FAILED,
+                route_decision=route_decision,
+                routed_tool_name=routed_tool_name,
+                tool_result=None,
+                started_at=execution_started_at,
+                failure_exception=exc,
+            )
+
+        if tool_result.success:
+            try:
+                result = await self._handle_success(
+                    task=task,
+                    attempt_key=attempt_key,
+                    tool_result=tool_result,
+                    route_decision=route_decision,
+                    started_at=execution_started_at,
+                )
+                runtime_log(
+                    layer="executor",
+                    event="success",
+                    data={
+                        "task_id": task.task_id,
+                        "tool": tool_result.tool_name,
+                        "status": TaskStatus.SUCCESS.value,
+                        "attempt": task.retry_count + 1,
+                        "attempt_key": attempt_key,
+                        "idempotency_key": task.idempotency_key,
+                    },
+                    latency_ms=(datetime.now() - task_started_at).total_seconds() * 1000,
+                    logger=self.logger,
+                )
+                return result
+            except Exception as exc:
+                runtime_log(
+                    layer="executor",
+                    event="error",
+                    data={
+                        "task_id": task.task_id,
+                        "tool": routed_tool_name,
+                        "error": f"executor internal error: {exc}",
+                        "attempt": task.retry_count + 1,
+                        "attempt_key": attempt_key,
+                        "idempotency_key": task.idempotency_key,
+                    },
+                    latency_ms=(datetime.now() - task_started_at).total_seconds() * 1000,
+                    level=logging.ERROR,
+                    logger=self.logger,
+                )
+                return await self._handle_failure(
+                    task=task,
+                    attempt_key=attempt_key,
+                    error_message=f"executor internal error: {exc}",
+                    final_status=TaskStatus.FAILED,
+                    route_decision=route_decision,
+                    routed_tool_name=routed_tool_name,
+                    tool_result=tool_result,
+                    started_at=execution_started_at,
+                )
+
+        try:
+            return await self._handle_failure(
+                task=task,
+                attempt_key=attempt_key,
+                error_message=tool_result.error or "宸ュ叿鎵ц澶辫触銆?,
+                final_status=TaskStatus.FAILED,
+                route_decision=route_decision,
+                routed_tool_name=routed_tool_name,
+                tool_result=tool_result,
+                started_at=execution_started_at,
+            )
+        except Exception as exc:
+            runtime_log(
+                layer="executor",
+                event="error",
+                data={
+                    "task_id": task.task_id,
+                    "tool": routed_tool_name,
+                    "error": f"executor internal error: {exc}",
+                    "attempt": task.retry_count + 1,
+                    "attempt_key": attempt_key,
+                    "idempotency_key": task.idempotency_key,
+                },
+                latency_ms=(datetime.now() - task_started_at).total_seconds() * 1000,
+                level=logging.ERROR,
+                logger=self.logger,
+            )
+            await self.queue.mark_task_failed(
+                task.task_id,
+                final_status=TaskStatus.FAILED,
+                message=f"executor internal error: {exc}",
+            )
+            fallback_result = TaskExecutionResult(
+                task_id=task.task_id,
+                output_key=task.output_key,
+                idempotency_key=task.idempotency_key,
+                attempt_key=attempt_key,
+                success=False,
+                final_status=TaskStatus.FAILED,
+                attempt=task.retry_count,
+                routed_tool=routed_tool_name,
+                retry_scheduled=False,
+                error_message=f"executor internal error: {exc}",
+                route_decision=route_decision,
+                tool_result=tool_result,
+                started_at=execution_started_at,
+                finished_at=utc_now(),
+            )
+            await self._store_execution_result(fallback_result)
+            await self._save_checkpoint(
+                "error",
+                {
+                    "task_id": task.task_id,
+                    "attempt_key": attempt_key,
+                    "error": fallback_result.error_message,
+                    "idempotency_key": task.idempotency_key,
+                },
+            )
+            return fallback_result
+
+    async def execute_until_complete(
+        self,
+        *,
+        batch_limit: int | None = None,
+        stop_after_results: int | None = None,
+    ) -> list[TaskExecutionResult]:
+        results: list[TaskExecutionResult] = []
+
+        while not await self.queue.is_complete():
+            batch = await self.execute_ready_tasks(limit=batch_limit)
+            if not batch:
+                snapshot = await self.queue.get_snapshot()
+                raise self._error(
+                    code="executor_stalled",
+                    message="executor stalled because no ready tasks could be scheduled",
+                    details=snapshot.model_dump(),
+                )
+
+            results.extend(batch)
+            if stop_after_results is not None and len(results) >= stop_after_results:
+                await self._save_checkpoint(
+                    "error",
+                    {
+                        "reason": "simulated_interruption",
+                        "executed_results": len(results),
+                    },
+                )
+                raise self._error(
+                    code="executor_interrupted",
+                    message="executor interrupted for checkpoint testing",
+                    details={"executed_results": len(results)},
+                )
+
+        return results
+
+    async def _handle_success(
+        self,
+        *,
+        task: TaskModel,
+        attempt_key: str,
+        tool_result: ToolResult,
+        route_decision: ToolRouteDecision | None,
+        started_at: datetime,
+    ) -> TaskExecutionResult:
+        self._record_tool_call(
+            task=task,
+            attempt_key=attempt_key,
+            task_id=task.task_id,
+            tool_name=tool_result.tool_name,
+            status=TaskStatus.SUCCESS.value,
+            tool_result=tool_result,
+            route_decision=route_decision,
+        )
+        self._record_token_usage(tool_result)
+        await self.queue.mark_task_success(task.task_id)
+        self.context.set_task_result(task.output_key, tool_result.output)
+
+        result = TaskExecutionResult(
+            task_id=task.task_id,
+            output_key=task.output_key,
+            idempotency_key=task.idempotency_key,
+            attempt_key=attempt_key,
+            success=True,
+            final_status=TaskStatus.SUCCESS,
+            attempt=task.retry_count,
+            routed_tool=tool_result.tool_name,
+            retry_scheduled=False,
+            error_message=None,
+            route_decision=route_decision,
+            tool_result=tool_result,
+            started_at=started_at,
+            finished_at=utc_now(),
+        )
+        self.context.set_idempotency_record(
+            IdempotencyRecord(
+                idempotency_key=task.idempotency_key or task.task_id,
+                task_id=task.task_id,
+                output_key=task.output_key,
+                tool_name=tool_result.tool_name,
+                attempt_key=attempt_key,
+                final_status=TaskStatus.SUCCESS,
+                success=True,
+                irreversible=task.irreversible,
+                output=tool_result.output,
+            )
+        )
+        await self._store_execution_result(result)
+        await self._save_checkpoint(
+            "success",
+            {
+                "task_id": task.task_id,
+                "attempt_key": attempt_key,
+                "output_key": task.output_key,
+                "idempotency_key": task.idempotency_key,
+            },
+        )
+        runtime_progress(step=f"task:{task.task_id}", status="鎵ц鎴愬姛", detail=f"宸ュ叿={tool_result.tool_name}")
+        return result
+
+    async def _handle_failure(
+        self,
+        *,
+        task: TaskModel,
+        attempt_key: str,
+        error_message: str,
+        final_status: TaskStatus,
+        route_decision: ToolRouteDecision | None,
+        routed_tool_name: str | None,
+        tool_result: ToolResult | None,
+        started_at: datetime,
+        failure_exception: Exception | None = None,
+    ) -> TaskExecutionResult:
+        resolved_status = self._resolve_failure_status(
+            task=task,
+            final_status=final_status,
+            error_message=error_message,
+            tool_result=tool_result,
+            failure_exception=failure_exception,
+        )
+        skip_retry = self._should_skip_retry(
+            task=task,
+            error_message=error_message,
+            tool_result=tool_result,
+            failure_exception=failure_exception,
+        )
+
+        if routed_tool_name is not None:
+            self._record_tool_call(
+                task=task,
+                attempt_key=attempt_key,
+                task_id=task.task_id,
+                tool_name=routed_tool_name,
+                status=resolved_status.value,
+                tool_result=tool_result,
+                route_decision=route_decision,
+                override_error=error_message,
+            )
+            if tool_result is not None:
+                try:
+                    self._record_token_usage(tool_result)
+                except Exception as exc:
+                    self.context.add_error(
+                        ErrorRecord(
+                            source="task_executor",
+                            task_id=task.task_id,
+                            message=f"failed to record token usage: {exc}",
+                            details={
+                                "attempt_key": attempt_key,
+                                "routed_tool": routed_tool_name,
+                                "original_error": error_message,
+                                "final_status": resolved_status.value,
+                            },
+                        )
+                    )
+
+        if self._can_schedule_retry(
+            task=task,
+            error_message=error_message,
+            tool_result=tool_result,
+            failure_exception=failure_exception,
+            skip_retry=skip_retry,
+        ):
+            self.context.add_error(
+                ErrorRecord(
+                    source="task_executor",
+                    task_id=task.task_id,
+                    message=error_message,
+                    details={
+                        "retry_scheduled": True,
+                        "attempt_key": attempt_key,
+                        "final_status": resolved_status.value,
+                        "routed_tool": routed_tool_name,
+                        "idempotency_key": task.idempotency_key,
+                    },
+                )
+            )
+            await self.queue.mark_task_for_retry(task.task_id)
+            runtime_progress(step=f"task:{task.task_id}", status="鍑嗗閲嶈瘯", detail=f"绗瑊task.retry_count}/{task.max_retry}娆?鍘熷洜={error_message[:80]}")
+            runtime_log(
+                layer="executor",
+                event="retry",
+                data={
+                    "task_id": task.task_id,
+                    "tool": routed_tool_name,
+                    "retry_count": task.retry_count,
+                    "max_retry": task.max_retry,
+                    "error": error_message,
+                    "attempt_key": attempt_key,
+                    "next_attempt_key": self._build_attempt_key(task),
+                    "idempotency_key": task.idempotency_key,
+                },
+                level=logging.ERROR,
+                logger=self.logger,
+            )
+            result = TaskExecutionResult(
+                task_id=task.task_id,
+                output_key=task.output_key,
+                idempotency_key=task.idempotency_key,
+                attempt_key=attempt_key,
+                success=False,
+                final_status=TaskStatus.RETRY,
+                attempt=task.retry_count,
+                routed_tool=routed_tool_name,
+                retry_scheduled=True,
+                error_message=error_message,
+                route_decision=route_decision,
+                tool_result=tool_result,
+                started_at=started_at,
+                finished_at=utc_now(),
+            )
+            self.context.set_idempotency_record(
+                IdempotencyRecord(
+                    idempotency_key=task.idempotency_key or task.task_id,
+                    task_id=task.task_id,
+                    output_key=task.output_key,
+                    tool_name=routed_tool_name,
+                    attempt_key=attempt_key,
+                    final_status=TaskStatus.RETRY,
+                    success=False,
+                    irreversible=task.irreversible,
+                    error_message=error_message,
+                )
+            )
+            await self._store_execution_result(result)
+            await self._save_checkpoint(
+                "retry",
+                {
+                    "task_id": task.task_id,
+                    "attempt_key": attempt_key,
+                    "error": error_message,
+                    "idempotency_key": task.idempotency_key,
+                },
+            )
+            return result
+
+        terminal_error_details: dict[str, object] = {
+            "retry_scheduled": False,
+            "attempt_key": attempt_key,
+            "final_status": resolved_status.value,
+            "routed_tool": routed_tool_name,
+            "idempotency_key": task.idempotency_key,
+        }
+        if skip_retry:
+            terminal_error_details["retry_skipped"] = True
+            terminal_error_details["fail_fast_triggered"] = True
+        self.context.add_error(
+            ErrorRecord(
+                source="task_executor",
+                task_id=task.task_id,
+                message=error_message,
+                details=terminal_error_details,
+            )
+        )
+
+        await self.queue.mark_task_failed(task.task_id, final_status=resolved_status, message=error_message)
+        runtime_progress(step=f"task:{task.task_id}", status="鎵ц瓒呮椂" if resolved_status == TaskStatus.TIMEOUT else "鎵ц澶辫触", detail=f"鍘熷洜={error_message[:80]}")
+        runtime_log(
+            layer="executor",
+            event="timeout" if resolved_status == TaskStatus.TIMEOUT else "error",
+            data={
+                "task_id": task.task_id,
+                "tool": routed_tool_name,
+                "status": resolved_status.value,
+                "error": error_message,
+                "attempt": task.retry_count + 1,
+                "attempt_key": attempt_key,
+                "idempotency_key": task.idempotency_key,
+                "retry_skipped": skip_retry,
+                "fail_fast_triggered": skip_retry,
+            },
+            level=logging.ERROR,
+            logger=self.logger,
+        )
+        result = TaskExecutionResult(
+            task_id=task.task_id,
+            output_key=task.output_key,
+            idempotency_key=task.idempotency_key,
+            attempt_key=attempt_key,
+            success=False,
+            final_status=resolved_status,
+            attempt=task.retry_count,
+            routed_tool=routed_tool_name,
+            retry_scheduled=False,
+            error_message=error_message,
+            route_decision=route_decision,
+            tool_result=tool_result,
+            started_at=started_at,
+            finished_at=utc_now(),
+        )
+        self.context.set_idempotency_record(
+            IdempotencyRecord(
+                idempotency_key=task.idempotency_key or task.task_id,
+                task_id=task.task_id,
+                output_key=task.output_key,
+                tool_name=routed_tool_name,
+                attempt_key=attempt_key,
+                final_status=resolved_status,
+                success=False,
+                irreversible=task.irreversible,
+                error_message=error_message,
+            )
+        )
+        await self._store_execution_result(result)
+        await self._save_checkpoint(
+            "timeout" if resolved_status == TaskStatus.TIMEOUT else "error",
+            {
+                "task_id": task.task_id,
+                "attempt_key": attempt_key,
+                "error": error_message,
+                "idempotency_key": task.idempotency_key,
+                "retry_skipped": skip_retry,
+                "fail_fast_triggered": skip_retry,
+            },
+        )
+        return result
+
+    async def _try_restore_from_idempotency(self, task: TaskModel) -> TaskExecutionResult | None:
+        record = self.context.get_idempotency_record(task.idempotency_key)
+        if record is None or not record.success:
+            return None
+
+        if task.status != TaskStatus.SUCCESS:
+            await self.queue.mark_task_success(task.task_id)
+        if record.output is not None:
+            self.context.set_task_result(task.output_key, record.output)
+
+        recovered_result = TaskExecutionResult(
+            task_id=task.task_id,
+            output_key=task.output_key,
+            idempotency_key=task.idempotency_key,
+            attempt_key=record.attempt_key or self._build_attempt_key(task),
+            success=True,
+            final_status=TaskStatus.SUCCESS,
+            attempt=task.retry_count,
+            routed_tool=record.tool_name,
+            retry_scheduled=False,
+            error_message=None,
+            route_decision=None,
+            tool_result=None,
+            started_at=utc_now(),
+            finished_at=utc_now(),
+        )
+        await self._store_execution_result(recovered_result)
+        runtime_log(
+            layer="executor",
+            event="success",
+            data={
+                "task_id": task.task_id,
+                "mode": "idempotent_recovery",
+                "attempt_key": recovered_result.attempt_key,
+                "idempotency_key": task.idempotency_key,
+                "irreversible": task.irreversible,
+            },
+            logger=self.logger,
+        )
+        runtime_progress(
+            step=f"task:{task.task_id}",
+            status="骞傜瓑鎭㈠",
+            detail=f"宸ュ叿={record.tool_name} | key={task.idempotency_key} | 鐩存帴浣跨敤缂撳瓨缁撴灉",
+        )
+        await self._save_checkpoint(
+            "success",
+            {
+                "task_id": task.task_id,
+                "mode": "idempotent_recovery",
+                "attempt_key": recovered_result.attempt_key,
+                "idempotency_key": task.idempotency_key,
+            },
+        )
+        return recovered_result
+
+    def _record_tool_call(
+        self,
+        *,
+        task: TaskModel,
+        attempt_key: str,
+        task_id: str,
+        tool_name: str,
+        status: str,
+        tool_result: ToolResult | None,
+        route_decision: ToolRouteDecision | None,
+        override_error: str | None = None,
+    ) -> None:
+        metadata = {
+            "attempt_key": attempt_key,
+            "route_decision": route_decision.model_dump() if route_decision is not None else None,
+            "input": task.input,
+            "output": tool_result.output if tool_result is not None else None,
+        }
+        if tool_result is not None:
+            metadata["tool_result_metadata"] = tool_result.metadata
+        if override_error:
+            metadata["error"] = override_error
+
+        started_at = tool_result.started_at if tool_result is not None else utc_now()
+        finished_at = tool_result.finished_at if tool_result is not None else utc_now()
+        latency_ms = tool_result.latency_ms if tool_result is not None else 0
+
+        self.context.add_tool_call(
+            ToolCallRecord(
+                tool_name=tool_name,
+                task_id=task_id,
+                idempotency_key=task.idempotency_key,
+                status=status,
+                started_at=started_at,
+                finished_at=finished_at,
+                latency_ms=latency_ms,
+                metadata={key: value for key, value in metadata.items() if value is not None},
+            )
+        )
+
+    def _record_token_usage(self, tool_result: ToolResult) -> None:
+        usage_payload = tool_result.metadata.get("usage")
+        if not usage_payload:
+            return
+
+        usage = usage_payload if isinstance(usage_payload, TokenUsage) else TokenUsage.model_validate(usage_payload)
+        self.context.add_token_usage(usage)
+
+    async def _store_execution_result(self, result: TaskExecutionResult) -> None:
+        payload = result.model_dump(mode="json")
+        async with self._lock:
+            self.context.set_shared_mapping_value(
+                self.result_context_key,
+                result.task_id,
+                payload,
+                allow_overwrite=True,
+            )
+            self.context.append_shared_list(f"{self.result_context_key}_history", payload)
+
+    def _get_task(self, task_id: str) -> TaskModel:
+        task = self.context.tasks.get(task_id)
+        if task is None:
+            raise self._error(
+                code="task_not_found",
+                message=f"task '{task_id}' was not found in context",
+                details={"task_id": task_id},
+            )
+        return task
+
+    def _error(self, *, code: str, message: str, details: dict[str, object] | None = None) -> TaskExecutorError:
+        payload = details or {}
+        runtime_log(
+            layer="executor",
+            event="error",
+            data={"code": code, "message": message, "details": payload},
+            level=logging.ERROR,
+            logger=self.logger,
+        )
+        return TaskExecutorError(ExecutorErrorDetail(code=code, message=message, details=payload))
+
+    async def _save_checkpoint(self, event: str, metadata: dict[str, object] | None = None) -> None:
+        if self.checkpoint_saver is None:
+            return
+        await self.checkpoint_saver(event, metadata)
+
+    def _build_tool_payload(
+        self,
+        task: TaskModel,
+        *,
+        tool_name: str | None = None,
+        tool_timeout: int | None = None,
+    ) -> dict[str, object]:
+        payload = dict(task.input)
+        dependency_outputs = self._collect_dependency_outputs(task)
+        if dependency_outputs and not str(payload.get("context") or "").strip():
+            payload["context"] = self._format_dependency_context(dependency_outputs)
+
+        resolved_tool_name = tool_name or task.tool
+        resolved_tool_timeout = int(tool_timeout if tool_timeout is not None else task.timeout)
+        timeout_settings = self._resolve_timeout_settings(
+            task=task,
+            tool_timeout=resolved_tool_timeout,
+            payload=payload,
+        )
+        payload["timeout_seconds"] = timeout_settings["timeout_seconds"]
+        payload["tool_timeout_seconds"] = timeout_settings["tool_timeout_seconds"]
+        payload["executor_timeout_seconds"] = timeout_settings["executor_timeout_seconds"]
+
+        runtime_log(
+            layer="executor",
+            event="execute",
+            data={
+                "task_id": task.task_id,
+                "tool": resolved_tool_name,
+                "attempt": task.retry_count + 1,
+                "attempt_key": self._build_attempt_key(task),
+                "timeout_seconds": timeout_settings["timeout_seconds"],
+                "tool_timeout_seconds": timeout_settings["tool_timeout_seconds"],
+                "executor_timeout_seconds": timeout_settings["executor_timeout_seconds"],
+                "current_context_keys": self.context.list_render_context_keys(),
+                "output_key_injections": [
+                    {
+                        "dependency_task_id": item["dependency_task_id"],
+                        "output_key": item["output_key"],
+                        "value_preview": item["value_preview"],
+                    }
+                    for item in dependency_outputs
+                ],
+                "payload_before_tool_call": payload,
+            },
+            level=logging.DEBUG,
+            logger=self.logger,
+        )
+        return payload
+
+    def _resolve_execution_timeout(
+        self,
+        *,
+        task: TaskModel,
+        tool_timeout: int,
+        payload: dict[str, object],
+    ) -> int:
+        return self._resolve_timeout_settings(
+            task=task,
+            tool_timeout=tool_timeout,
+            payload=payload,
+        )["executor_timeout_seconds"]
+
+    def _build_attempt_key(self, task: TaskModel) -> str:
+        base_key = task.idempotency_key or f"{self.context.runtime.request_id}:{task.task_id}:{task.output_key}"
+        return f"{base_key}:attempt:{task.retry_count + 1}"
+
+    def _resolve_timeout_settings(
+        self,
+        *,
+        task: TaskModel,
+        tool_timeout: int,
+        payload: dict[str, object],
+    ) -> dict[str, int]:
+        explicit_timeout = self._coerce_positive_int(payload.get("timeout_seconds"))
+        explicit_tool_timeout = self._coerce_positive_int(payload.get("tool_timeout_seconds"))
+        explicit_executor_timeout = self._coerce_positive_int(payload.get("executor_timeout_seconds"))
+
+        if task.tool not in {FAIL_FAST_TOOL_NAME, REASON_TOOL_NAME}:
+            baseline_timeout = explicit_timeout or explicit_tool_timeout or explicit_executor_timeout
+            if baseline_timeout <= 0:
+                baseline_timeout = int(
+                    task.timeout if task.timeout > 0 and task.timeout not in {60, 120} else tool_timeout
+                )
+            return {
+                "timeout_seconds": baseline_timeout,
+                "tool_timeout_seconds": baseline_timeout,
+                "executor_timeout_seconds": baseline_timeout,
+            }
+
+        llm_timeout_default = FAIL_FAST_LLM_TIMEOUT_SECONDS if task.tool == FAIL_FAST_TOOL_NAME else REASON_LLM_TIMEOUT_SECONDS
+        tool_timeout_default = FAIL_FAST_TOOL_TIMEOUT_SECONDS if task.tool == FAIL_FAST_TOOL_NAME else REASON_TOOL_TIMEOUT_SECONDS
+        executor_timeout_default = (
+            FAIL_FAST_EXECUTOR_TIMEOUT_SECONDS if task.tool == FAIL_FAST_TOOL_NAME else REASON_EXECUTOR_TIMEOUT_SECONDS
+        )
+
+        llm_timeout = explicit_timeout or llm_timeout_default
+        resolved_tool_timeout = explicit_tool_timeout or tool_timeout or tool_timeout_default
+        resolved_executor_timeout = explicit_executor_timeout or max(
+            executor_timeout_default,
+            resolved_tool_timeout + 15,
+            task.timeout if task.timeout > 0 and task.timeout not in {60, 120} else 0,
+        )
+        resolved_tool_timeout = max(resolved_tool_timeout, llm_timeout + 1)
+        resolved_executor_timeout = max(resolved_executor_timeout, resolved_tool_timeout + 1, llm_timeout + 1)
+
+        return {
+            "timeout_seconds": llm_timeout,
+            "tool_timeout_seconds": resolved_tool_timeout,
+            "executor_timeout_seconds": resolved_executor_timeout,
+        }
+
+    def _resolve_failure_status(
+        self,
+        *,
+        task: TaskModel,
+        final_status: TaskStatus,
+        error_message: str,
+        tool_result: ToolResult | None,
+        failure_exception: Exception | None,
+    ) -> TaskStatus:
+        if final_status == TaskStatus.TIMEOUT:
+            return final_status
+        if self._is_timeout_failure(
+            task=task,
+            error_message=error_message,
+            tool_result=tool_result,
+            failure_exception=failure_exception,
+        ):
+            return TaskStatus.TIMEOUT
+        return final_status
+
+    def _should_skip_retry(
+        self,
+        *,
+        task: TaskModel,
+        error_message: str,
+        tool_result: ToolResult | None,
+        failure_exception: Exception | None,
+    ) -> bool:
+        if task.tool == FAIL_FAST_TOOL_NAME:
+            return self._is_timeout_failure(
+                task=task,
+                error_message=error_message,
+                tool_result=tool_result,
+                failure_exception=failure_exception,
+            )
+        if task.tool == REASON_TOOL_NAME:
+            return self._is_timeout_failure(
+                task=task,
+                error_message=error_message,
+                tool_result=tool_result,
+                failure_exception=failure_exception,
+            )
+        return False
+
+    def _can_schedule_retry(
+        self,
+        *,
+        task: TaskModel,
+        error_message: str,
+        tool_result: ToolResult | None,
+        failure_exception: Exception | None,
+        skip_retry: bool,
+    ) -> bool:
+        if not task.can_retry() or skip_retry:
+            return False
+        if task.tool != REASON_TOOL_NAME:
+            return True
+        if not self._is_retryable_reason_failure(
+            error_message=error_message,
+            tool_result=tool_result,
+            failure_exception=failure_exception,
+        ):
+            return False
+        return task.retry_count < REASON_MAX_RECOVERABLE_RETRIES
+
+    def _is_timeout_failure(
+        self,
+        *,
+        task: TaskModel,
+        error_message: str,
+        tool_result: ToolResult | None,
+        failure_exception: Exception | None,
+    ) -> bool:
+        if task.tool not in {FAIL_FAST_TOOL_NAME, REASON_TOOL_NAME}:
+            return False
+        if tool_result is not None and bool(
+            tool_result.metadata.get("fail_fast_timeout") or tool_result.metadata.get("timeout_fail_fast")
+        ):
+            return True
+        if isinstance(
+            failure_exception,
+            (asyncio.TimeoutError, httpx.ReadTimeout, httpx.ConnectTimeout, httpx.TimeoutException),
+        ):
+            return True
+        normalized_error = str(error_message or "").lower()
+        return "provider_timeout_fail_fast" in normalized_error or "provider timeout" in normalized_error
+
+    def _is_retryable_reason_failure(
+        self,
+        *,
+        error_message: str,
+        tool_result: ToolResult | None,
+        failure_exception: Exception | None,
+    ) -> bool:
+        if isinstance(
+            failure_exception,
+            (httpx.HTTPStatusError, httpx.ConnectError, httpx.RemoteProtocolError, httpx.NetworkError),
+        ):
+            return True
+        if tool_result is not None and bool(tool_result.metadata.get("retryable_error")):
+            return True
+        normalized_error = str(error_message or "").lower()
+        return (
+            "provider_retryable_error" in normalized_error
+            or " 429 " in normalized_error
+            or " 500 " in normalized_error
+            or " 502 " in normalized_error
+            or " 503 " in normalized_error
+            or " 504 " in normalized_error
+        )
+
+    def _coerce_positive_int(self, value: object) -> int:
+        try:
+            resolved = int(value) if value is not None else 0
+        except (TypeError, ValueError):
+            return 0
+        return resolved if resolved > 0 else 0
+
+    def _collect_dependency_outputs(self, task: TaskModel) -> list[dict[str, object]]:
+        dependency_outputs: list[dict[str, object]] = []
+        for dependency_task_id in task.depends_on:
+            dependency_task = self.context.tasks.get(dependency_task_id)
+            if dependency_task is None:
+                continue
+            if dependency_task.output_key not in self.context.task_results:
+                continue
+            value = self.context.task_results[dependency_task.output_key]
+            dependency_outputs.append(
+                {
+                    "dependency_task_id": dependency_task_id,
+                    "output_key": dependency_task.output_key,
+                    "value": value,
+                    "value_preview": self._preview_dependency_output(value),
+                }
+            )
+        return dependency_outputs
+
+    def _format_dependency_context(self, dependency_outputs: list[dict[str, object]]) -> str:
+        blocks: list[str] = []
+        for item in dependency_outputs:
+            blocks.append(f"[{item['output_key']}]\n{self._preview_dependency_output(item['value'], limit=4000)}")
+        return "\n\n".join(blocks)
+
+    def _preview_dependency_output(self, value: object, *, limit: int = 500) -> str:
+        if isinstance(value, str):
+            text = value
+        elif isinstance(value, dict) and isinstance(value.get("text"), str):
+            text = str(value.get("text"))
+        elif isinstance(value, (dict, list)):
+            text = json.dumps(value, ensure_ascii=False, indent=2)
+        else:
+            text = str(value)
+        return text[:limit]

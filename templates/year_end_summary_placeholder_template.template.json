@@ -1,0 +1,935 @@
+{
+  "source_template_path": "个人年终总结.pptx",
+  "template_path": "templates\\year_end_summary_placeholder_template.pptx",
+  "slide_count": 32,
+  "placeholders": {
+    "slide_01": [
+      "slide_01_title",
+      "slide_01_body_1"
+    ],
+    "slide_02": [
+      "slide_02_title"
+    ],
+    "slide_03": [
+      "slide_03_subtitle",
+      "slide_03_title",
+      "slide_03_body_1"
+    ],
+    "slide_04": [
+      "slide_04_title",
+      "slide_04_body_1",
+      "slide_04_body_2",
+      "slide_04_body_3",
+      "slide_04_body_4",
+      "slide_04_body_5"
+    ],
+    "slide_05": [
+      "slide_05_title",
+      "slide_05_body_1",
+      "slide_05_body_2",
+      "slide_05_body_3"
+    ],
+    "slide_06": [
+      "slide_06_title",
+      "slide_06_body_1",
+      "slide_06_body_2",
+      "slide_06_body_3"
+    ],
+    "slide_07": [
+      "slide_07_body_1",
+      "slide_07_body_2",
+      "slide_07_subtitle",
+      "slide_07_body_3",
+      "slide_07_body_4",
+      "slide_07_title"
+    ],
+    "slide_08": [
+      "slide_08_title",
+      "slide_08_body_1",
+      "slide_08_body_2",
+      "slide_08_body_3",
+      "slide_08_body_4"
+    ],
+    "slide_09": [
+      "slide_09_subtitle",
+      "slide_09_title",
+      "slide_09_body_1"
+    ],
+    "slide_10": [
+      "slide_10_title",
+      "slide_10_body_1"
+    ],
+    "slide_11": [
+      "slide_11_body_1",
+      "slide_11_body_2",
+      "slide_11_title",
+      "slide_11_body_3",
+      "slide_11_body_4"
+    ],
+    "slide_12": [
+      "slide_12_title",
+      "slide_12_subtitle",
+      "slide_12_body_1",
+      "slide_12_body_2"
+    ],
+    "slide_13": [
+      "slide_13_title",
+      "slide_13_body_1",
+      "slide_13_subtitle",
+      "slide_13_body_2",
+      "slide_13_body_3"
+    ],
+    "slide_14": [
+      "slide_14_title",
+      "slide_14_subtitle",
+      "slide_14_body_1",
+      "slide_14_body_2",
+      "slide_14_body_3"
+    ],
+    "slide_15": [
+      "slide_15_title",
+      "slide_15_subtitle",
+      "slide_15_body_1"
+    ],
+    "slide_16": [
+      "slide_16_title",
+      "slide_16_body_1"
+    ],
+    "slide_17": [
+      "slide_17_subtitle",
+      "slide_17_title",
+      "slide_17_body_1"
+    ],
+    "slide_18": [
+      "slide_18_subtitle",
+      "slide_18_title"
+    ],
+    "slide_19": [],
+    "slide_20": [
+      "slide_20_body_1",
+      "slide_20_body_2",
+      "slide_20_title",
+      "slide_20_body_3",
+      "slide_20_body_4"
+    ],
+    "slide_21": [
+      "slide_21_body_1",
+      "slide_21_title",
+      "slide_21_body_2"
+    ],
+    "slide_22": [
+      "slide_22_title"
+    ],
+    "slide_23": [
+      "slide_23_subtitle",
+      "slide_23_title",
+      "slide_23_body_1"
+    ],
+    "slide_24": [
+      "slide_24_title",
+      "slide_24_subtitle",
+      "slide_24_body_1",
+      "slide_24_body_2",
+      "slide_24_body_3",
+      "slide_24_body_4",
+      "slide_24_body_5",
+      "slide_24_body_6"
+    ],
+    "slide_25": [
+      "slide_25_title",
+      "slide_25_body_1",
+      "slide_25_body_2",
+      "slide_25_body_3"
+    ],
+    "slide_26": [
+      "slide_26_body_1",
+      "slide_26_title",
+      "slide_26_subtitle",
+      "slide_26_body_2",
+      "slide_26_body_3"
+    ],
+    "slide_27": [
+      "slide_27_title",
+      "slide_27_subtitle"
+    ],
+    "slide_28": [
+      "slide_28_title",
+      "slide_28_body_1",
+      "slide_28_body_2",
+      "slide_28_body_3",
+      "slide_28_body_4"
+    ],
+    "slide_29": [
+      "slide_29_title",
+      "slide_29_body_1",
+      "slide_29_body_2"
+    ],
+    "slide_30": [
+      "slide_30_title",
+      "slide_30_body_1"
+    ],
+    "slide_31": [],
+    "slide_32": [
+      "slide_32_subtitle",
+      "slide_32_title"
+    ]
+  },
+  "placeholder_specs": {
+    "slide_01_title": {
+      "slide_ref": "slide_01",
+      "role": "title",
+      "max_chars": 32,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "励志风年终工作总结"
+    },
+    "slide_01_body_1": {
+      "slide_ref": "slide_01",
+      "role": "body",
+      "max_chars": 160,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "人生的路，就是一场从生到死的跋涉与攀登，路难，事难，做人更难。其间，好人难做，恶人不能做 做一个好人，会承受心灵的压力，告诉自己，尽善尽美，赢得社会的赞誉，难在放弃。做一个恶人，要顶住良心的谴责，社会的唾弃，承受内外的夹击，把人生的一切毁去"
+    },
+    "slide_02_title": {
+      "slide_ref": "slide_02",
+      "role": "title",
+      "max_chars": 32,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "Lorem ipsum dolor sit amet, consectetuer dipiscing elit, sed diam nonummy nibheuismod tincidunt ut laoreet dolore magna "
+    },
+    "slide_03_subtitle": {
+      "slide_ref": "slide_03",
+      "role": "subtitle",
+      "max_chars": 48,
+      "instruction": "本页副标题或说明语，作为标题补充，保持简洁。",
+      "source_text": "永攀高峰 共创辉煌"
+    },
+    "slide_03_title": {
+      "slide_ref": "slide_03",
+      "role": "title",
+      "max_chars": 32,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "应履行的工作职责"
+    },
+    "slide_03_body_1": {
+      "slide_ref": "slide_03",
+      "role": "body",
+      "max_chars": 160,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "Lorem ipsum dolor sit amet, consectetuer dipiscing elit, sed diam nonummy nibheuismod tincidunt ut laoreet dolore magna "
+    },
+    "slide_04_title": {
+      "slide_ref": "slide_04",
+      "role": "title",
+      "max_chars": 32,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "岗位工作职责概述"
+    },
+    "slide_04_body_1": {
+      "slide_ref": "slide_04",
+      "role": "body",
+      "max_chars": 160,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述此处添加详细文本描述此处添加详细文本描述此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述此处添加详细文本描述此处添加详细文本描述"
+    },
+    "slide_04_body_2": {
+      "slide_ref": "slide_04",
+      "role": "body",
+      "max_chars": 72,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述此处添加"
+    },
+    "slide_04_body_3": {
+      "slide_ref": "slide_04",
+      "role": "body",
+      "max_chars": 78,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述此处添加"
+    },
+    "slide_04_body_4": {
+      "slide_ref": "slide_04",
+      "role": "body",
+      "max_chars": 78,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述此处添加"
+    },
+    "slide_04_body_5": {
+      "slide_ref": "slide_04",
+      "role": "body",
+      "max_chars": 78,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述此处添加"
+    },
+    "slide_05_title": {
+      "slide_ref": "slide_05",
+      "role": "title",
+      "max_chars": 28,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "工作职责概述"
+    },
+    "slide_05_body_1": {
+      "slide_ref": "slide_05",
+      "role": "body",
+      "max_chars": 160,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格，建议与标题相关并符合整体语言风格，语言描述尽量精简此处此处添加详细文本描述，建议与标题相关并符合整体语言风格，建议与标题相关并符合整体语言风格，语言描述"
+    },
+    "slide_05_body_2": {
+      "slide_ref": "slide_05",
+      "role": "body",
+      "max_chars": 91,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格，建议与标题相关并符合整体语言风格，语言描述尽量精简此处"
+    },
+    "slide_05_body_3": {
+      "slide_ref": "slide_05",
+      "role": "body",
+      "max_chars": 91,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格，建议与标题相关并符合整体语言风格，语言描述尽量精简此处"
+    },
+    "slide_06_title": {
+      "slide_ref": "slide_06",
+      "role": "title",
+      "max_chars": 30,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "工作职责概述"
+    },
+    "slide_06_body_1": {
+      "slide_ref": "slide_06",
+      "role": "body",
+      "max_chars": 109,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述此处添加详细文本描述此处添加详细文本描述此处添加详细文本描述"
+    },
+    "slide_06_body_2": {
+      "slide_ref": "slide_06",
+      "role": "body",
+      "max_chars": 115,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述此处添加详细文本描述此处添加详细文本描述此处添加详细文本描述"
+    },
+    "slide_06_body_3": {
+      "slide_ref": "slide_06",
+      "role": "body",
+      "max_chars": 115,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述此处添加详细文本描述此处添加详细文本描述此处添加详细文本描述"
+    },
+    "slide_07_body_1": {
+      "slide_ref": "slide_07",
+      "role": "body",
+      "max_chars": 60,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体"
+    },
+    "slide_07_body_2": {
+      "slide_ref": "slide_07",
+      "role": "body",
+      "max_chars": 60,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体"
+    },
+    "slide_07_subtitle": {
+      "slide_ref": "slide_07",
+      "role": "subtitle",
+      "max_chars": 41,
+      "instruction": "本页副标题或说明语，作为标题补充，保持简洁。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体"
+    },
+    "slide_07_body_3": {
+      "slide_ref": "slide_07",
+      "role": "body",
+      "max_chars": 66,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体"
+    },
+    "slide_07_body_4": {
+      "slide_ref": "slide_07",
+      "role": "body",
+      "max_chars": 66,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体"
+    },
+    "slide_07_title": {
+      "slide_ref": "slide_07",
+      "role": "title",
+      "max_chars": 32,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体"
+    },
+    "slide_08_title": {
+      "slide_ref": "slide_08",
+      "role": "title",
+      "max_chars": 28,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "工作职责概述"
+    },
+    "slide_08_body_1": {
+      "slide_ref": "slide_08",
+      "role": "body",
+      "max_chars": 103,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述此处添加详细文本描述，建议与标题相关"
+    },
+    "slide_08_body_2": {
+      "slide_ref": "slide_08",
+      "role": "body",
+      "max_chars": 103,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述此处添加详细文本描述，建议与标题相关"
+    },
+    "slide_08_body_3": {
+      "slide_ref": "slide_08",
+      "role": "body",
+      "max_chars": 103,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述此处添加详细文本描述，建议与标题相关"
+    },
+    "slide_08_body_4": {
+      "slide_ref": "slide_08",
+      "role": "body",
+      "max_chars": 103,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述此处添加详细文本描述，建议与标题相关"
+    },
+    "slide_09_subtitle": {
+      "slide_ref": "slide_09",
+      "role": "subtitle",
+      "max_chars": 48,
+      "instruction": "本页副标题或说明语，作为标题补充，保持简洁。",
+      "source_text": "永攀高峰 共创辉煌"
+    },
+    "slide_09_title": {
+      "slide_ref": "slide_09",
+      "role": "title",
+      "max_chars": 32,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "主要工作完成情况"
+    },
+    "slide_09_body_1": {
+      "slide_ref": "slide_09",
+      "role": "body",
+      "max_chars": 160,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "Lorem ipsum dolor sit amet, consectetuer dipiscing elit, sed diam nonummy nibheuismod tincidunt ut laoreet dolore magna "
+    },
+    "slide_10_title": {
+      "slide_ref": "slide_10",
+      "role": "title",
+      "max_chars": 30,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "项目工作完成情况"
+    },
+    "slide_10_body_1": {
+      "slide_ref": "slide_10",
+      "role": "body",
+      "max_chars": 160,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述此处添加详细文本描述此处添加详细文本描述此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述此处添加详细文本描述此处添加详细文本描述"
+    },
+    "slide_11_body_1": {
+      "slide_ref": "slide_11",
+      "role": "body",
+      "max_chars": 90,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述此处添加详细文本"
+    },
+    "slide_11_body_2": {
+      "slide_ref": "slide_11",
+      "role": "body",
+      "max_chars": 90,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述此处添加详细文本"
+    },
+    "slide_11_title": {
+      "slide_ref": "slide_11",
+      "role": "title",
+      "max_chars": 32,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "项目 报告"
+    },
+    "slide_11_body_3": {
+      "slide_ref": "slide_11",
+      "role": "body",
+      "max_chars": 90,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述此处添加详细文本"
+    },
+    "slide_11_body_4": {
+      "slide_ref": "slide_11",
+      "role": "body",
+      "max_chars": 90,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述此处添加详细文本"
+    },
+    "slide_12_title": {
+      "slide_ref": "slide_12",
+      "role": "title",
+      "max_chars": 32,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本"
+    },
+    "slide_12_subtitle": {
+      "slide_ref": "slide_12",
+      "role": "subtitle",
+      "max_chars": 41,
+      "instruction": "本页副标题或说明语，作为标题补充，保持简洁。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本"
+    },
+    "slide_12_body_1": {
+      "slide_ref": "slide_12",
+      "role": "body",
+      "max_chars": 66,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本"
+    },
+    "slide_12_body_2": {
+      "slide_ref": "slide_12",
+      "role": "body",
+      "max_chars": 66,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本"
+    },
+    "slide_13_title": {
+      "slide_ref": "slide_13",
+      "role": "title",
+      "max_chars": 32,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "主要工作完成情况"
+    },
+    "slide_13_body_1": {
+      "slide_ref": "slide_13",
+      "role": "body",
+      "max_chars": 160,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "在这里输入你的正文阐述与关键词标题相关的具体内容，若字数太多酌情删减文案在这里输入你的正文阐述与关键词标题相关的具体内容，在这里输入你的正文阐述与关键词标题相关的具体内容,若字数太多酌情删减文案……"
+    },
+    "slide_13_subtitle": {
+      "slide_ref": "slide_13",
+      "role": "subtitle",
+      "max_chars": 44,
+      "instruction": "本页副标题或说明语，作为标题补充，保持简洁。",
+      "source_text": "在这里输入你的正文阐述与关键词标题相关的具体内容"
+    },
+    "slide_13_body_2": {
+      "slide_ref": "slide_13",
+      "role": "body",
+      "max_chars": 72,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "在这里输入你的正文阐述与关键词标题相关的具体内容"
+    },
+    "slide_13_body_3": {
+      "slide_ref": "slide_13",
+      "role": "body",
+      "max_chars": 72,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "在这里输入你的正文阐述与关键词标题相关的具体内容"
+    },
+    "slide_14_title": {
+      "slide_ref": "slide_14",
+      "role": "title",
+      "max_chars": 28,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "此处添加详细内容此处添加详细内容此处添加详细内容"
+    },
+    "slide_14_subtitle": {
+      "slide_ref": "slide_14",
+      "role": "subtitle",
+      "max_chars": 38,
+      "instruction": "本页副标题或说明语，作为标题补充，保持简洁。",
+      "source_text": "此处添加详细内容此处添加详细内容此处添加详细内容"
+    },
+    "slide_14_body_1": {
+      "slide_ref": "slide_14",
+      "role": "body",
+      "max_chars": 60,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细内容此处添加详细内容此处添加详细内容"
+    },
+    "slide_14_body_2": {
+      "slide_ref": "slide_14",
+      "role": "body",
+      "max_chars": 60,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细内容此处添加详细内容此处添加详细内容"
+    },
+    "slide_14_body_3": {
+      "slide_ref": "slide_14",
+      "role": "body",
+      "max_chars": 60,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细内容此处添加详细内容此处添加详细内容"
+    },
+    "slide_15_title": {
+      "slide_ref": "slide_15",
+      "role": "title",
+      "max_chars": 30,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "在这里输入你的正文阐述与关键词标题相关的具体内容"
+    },
+    "slide_15_subtitle": {
+      "slide_ref": "slide_15",
+      "role": "subtitle",
+      "max_chars": 41,
+      "instruction": "本页副标题或说明语，作为标题补充，保持简洁。",
+      "source_text": "在这里输入你的正文阐述与关键词标题相关的具体内容"
+    },
+    "slide_15_body_1": {
+      "slide_ref": "slide_15",
+      "role": "body",
+      "max_chars": 66,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "在这里输入你的正文阐述与关键词标题相关的具体内容"
+    },
+    "slide_16_title": {
+      "slide_ref": "slide_16",
+      "role": "title",
+      "max_chars": 32,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "工作成果及展示"
+    },
+    "slide_16_body_1": {
+      "slide_ref": "slide_16",
+      "role": "body",
+      "max_chars": 160,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "在这里输入你的正文阐述与关键词标题相关的具体内容，若字数太多酌情删减文案在这里输入你的正文阐述与关键词标题相关的具体内容，在这里输入你的正文阐述与关键词标题相关的具体内容,若字数太多酌情删减文案……"
+    },
+    "slide_17_subtitle": {
+      "slide_ref": "slide_17",
+      "role": "subtitle",
+      "max_chars": 48,
+      "instruction": "本页副标题或说明语，作为标题补充，保持简洁。",
+      "source_text": "永攀高峰 共创辉煌"
+    },
+    "slide_17_title": {
+      "slide_ref": "slide_17",
+      "role": "title",
+      "max_chars": 32,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "存在问题不足分析"
+    },
+    "slide_17_body_1": {
+      "slide_ref": "slide_17",
+      "role": "body",
+      "max_chars": 160,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "Lorem ipsum dolor sit amet, consectetuer dipiscing elit, sed diam nonummy nibheuismod tincidunt ut laoreet dolore magna "
+    },
+    "slide_18_subtitle": {
+      "slide_ref": "slide_18",
+      "role": "subtitle",
+      "max_chars": 38,
+      "instruction": "本页副标题或说明语，作为标题补充，保持简洁。",
+      "source_text": "此处添加详细文本描述，建议与标题相关"
+    },
+    "slide_18_title": {
+      "slide_ref": "slide_18",
+      "role": "title",
+      "max_chars": 28,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "此处添加详细文本描述，建议与标题相关"
+    },
+    "slide_20_body_1": {
+      "slide_ref": "slide_20",
+      "role": "body",
+      "max_chars": 78,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述此处添加详细文本描述"
+    },
+    "slide_20_body_2": {
+      "slide_ref": "slide_20",
+      "role": "body",
+      "max_chars": 78,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述此处添加详细文本描述"
+    },
+    "slide_20_title": {
+      "slide_ref": "slide_20",
+      "role": "title",
+      "max_chars": 26,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "疑难 问题"
+    },
+    "slide_20_body_3": {
+      "slide_ref": "slide_20",
+      "role": "body",
+      "max_chars": 78,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述此处添加详细文本描述"
+    },
+    "slide_20_body_4": {
+      "slide_ref": "slide_20",
+      "role": "body",
+      "max_chars": 78,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述此处添加详细文本描述"
+    },
+    "slide_21_body_1": {
+      "slide_ref": "slide_21",
+      "role": "body",
+      "max_chars": 108,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述，建议与标题相关并符合整体语言风格"
+    },
+    "slide_21_title": {
+      "slide_ref": "slide_21",
+      "role": "title",
+      "max_chars": 32,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述"
+    },
+    "slide_21_body_2": {
+      "slide_ref": "slide_21",
+      "role": "body",
+      "max_chars": 108,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述，建议与标题相关并符合整体语言风格"
+    },
+    "slide_22_title": {
+      "slide_ref": "slide_22",
+      "role": "title",
+      "max_chars": 32,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "不足分析与改进"
+    },
+    "slide_23_subtitle": {
+      "slide_ref": "slide_23",
+      "role": "subtitle",
+      "max_chars": 48,
+      "instruction": "本页副标题或说明语，作为标题补充，保持简洁。",
+      "source_text": "永攀高峰 共创辉煌"
+    },
+    "slide_23_title": {
+      "slide_ref": "slide_23",
+      "role": "title",
+      "max_chars": 32,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "明年工作发展规划"
+    },
+    "slide_23_body_1": {
+      "slide_ref": "slide_23",
+      "role": "body",
+      "max_chars": 160,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "Lorem ipsum dolor sit amet, consectetuer dipiscing elit, sed diam nonummy nibheuismod tincidunt ut laoreet dolore magna "
+    },
+    "slide_24_title": {
+      "slide_ref": "slide_24",
+      "role": "title",
+      "max_chars": 30,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "38亿元"
+    },
+    "slide_24_subtitle": {
+      "slide_ref": "slide_24",
+      "role": "subtitle",
+      "max_chars": 41,
+      "instruction": "本页副标题或说明语，作为标题补充，保持简洁。",
+      "source_text": "42亿元"
+    },
+    "slide_24_body_1": {
+      "slide_ref": "slide_24",
+      "role": "body",
+      "max_chars": 66,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格"
+    },
+    "slide_24_body_2": {
+      "slide_ref": "slide_24",
+      "role": "body",
+      "max_chars": 66,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格"
+    },
+    "slide_24_body_3": {
+      "slide_ref": "slide_24",
+      "role": "body",
+      "max_chars": 66,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格"
+    },
+    "slide_24_body_4": {
+      "slide_ref": "slide_24",
+      "role": "body",
+      "max_chars": 66,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格"
+    },
+    "slide_24_body_5": {
+      "slide_ref": "slide_24",
+      "role": "body",
+      "max_chars": 60,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格"
+    },
+    "slide_24_body_6": {
+      "slide_ref": "slide_24",
+      "role": "body",
+      "max_chars": 129,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述，建议与标题相关并符合整体语言风格"
+    },
+    "slide_25_title": {
+      "slide_ref": "slide_25",
+      "role": "title",
+      "max_chars": 26,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "工作规划与展望"
+    },
+    "slide_25_body_1": {
+      "slide_ref": "slide_25",
+      "role": "body",
+      "max_chars": 83,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格，建议与标题相关此处添加详细文本描述，建议与标题相关"
+    },
+    "slide_25_body_2": {
+      "slide_ref": "slide_25",
+      "role": "body",
+      "max_chars": 83,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格，建议与标题相关此处添加详细文本描述，建议与标题相关"
+    },
+    "slide_25_body_3": {
+      "slide_ref": "slide_25",
+      "role": "body",
+      "max_chars": 83,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格，建议与标题相关此处添加详细文本描述，建议与标题相关"
+    },
+    "slide_26_body_1": {
+      "slide_ref": "slide_26",
+      "role": "body",
+      "max_chars": 160,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述此处添加详细文本描述此处添加详细文本描述此处添加详细文本描述此处添加详细文本描述，建议与标题相关并符合整体语言风格"
+    },
+    "slide_26_title": {
+      "slide_ref": "slide_26",
+      "role": "title",
+      "max_chars": 32,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "在此处添加内容在此次添加内容在此处添加内容在此次添加内容在"
+    },
+    "slide_26_subtitle": {
+      "slide_ref": "slide_26",
+      "role": "subtitle",
+      "max_chars": 44,
+      "instruction": "本页副标题或说明语，作为标题补充，保持简洁。",
+      "source_text": "在此处添加内容在此次添加内容在此处添加内容在此次添加内容在"
+    },
+    "slide_26_body_2": {
+      "slide_ref": "slide_26",
+      "role": "body",
+      "max_chars": 72,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "在此处添加内容在此次添加内容在此处添加内容在此次添加内容在"
+    },
+    "slide_26_body_3": {
+      "slide_ref": "slide_26",
+      "role": "body",
+      "max_chars": 72,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "在此处添加内容在此次添加内容在此处添加内容在此次添加内容在"
+    },
+    "slide_27_title": {
+      "slide_ref": "slide_27",
+      "role": "title",
+      "max_chars": 30,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "此处添加详细文本描述，建议与标题相关"
+    },
+    "slide_27_subtitle": {
+      "slide_ref": "slide_27",
+      "role": "subtitle",
+      "max_chars": 41,
+      "instruction": "本页副标题或说明语，作为标题补充，保持简洁。",
+      "source_text": "此处添加详细文本描述，建议与标题相关"
+    },
+    "slide_28_title": {
+      "slide_ref": "slide_28",
+      "role": "title",
+      "max_chars": 28,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "工作规划"
+    },
+    "slide_28_body_1": {
+      "slide_ref": "slide_28",
+      "role": "body",
+      "max_chars": 96,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述，建议与标题相关并符合整体语言风格"
+    },
+    "slide_28_body_2": {
+      "slide_ref": "slide_28",
+      "role": "body",
+      "max_chars": 96,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述，建议与标题相关并符合整体语言风格"
+    },
+    "slide_28_body_3": {
+      "slide_ref": "slide_28",
+      "role": "body",
+      "max_chars": 96,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述，建议与标题相关并符合整体语言风格"
+    },
+    "slide_28_body_4": {
+      "slide_ref": "slide_28",
+      "role": "body",
+      "max_chars": 96,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格此处添加详细文本描述，建议与标题相关并符合整体语言风格"
+    },
+    "slide_29_title": {
+      "slide_ref": "slide_29",
+      "role": "title",
+      "max_chars": 26,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "明年工作展望"
+    },
+    "slide_29_body_1": {
+      "slide_ref": "slide_29",
+      "role": "body",
+      "max_chars": 154,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格，建议与标题相关此处添加详细文本此处添加详细文本描述，建议与标题相关并符合整体语言风格"
+    },
+    "slide_29_body_2": {
+      "slide_ref": "slide_29",
+      "role": "body",
+      "max_chars": 154,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "此处添加详细文本描述，建议与标题相关并符合整体语言风格，建议与标题相关此处添加详细文本此处添加详细文本描述，建议与标题相关并符合整体语言风格"
+    },
+    "slide_30_title": {
+      "slide_ref": "slide_30",
+      "role": "title",
+      "max_chars": 32,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "演示完毕 谢谢观看"
+    },
+    "slide_30_body_1": {
+      "slide_ref": "slide_30",
+      "role": "body",
+      "max_chars": 160,
+      "instruction": "本页正文内容，适合 PPT 展示，尽量精炼。",
+      "source_text": "人生的路，就是一场从生到死的跋涉与攀登，路难，事难，做人更难。其间，好人难做，恶人不能做 做一个好人，会承受心灵的压力，告诉自己，尽善尽美，赢得社会的赞誉，难在放弃。做一个恶人，要顶住良心的谴责，社会的唾弃，承受内外的夹击，把人生的一切毁去"
+    },
+    "slide_32_subtitle": {
+      "slide_ref": "slide_32",
+      "role": "subtitle",
+      "max_chars": 48,
+      "instruction": "本页副标题或说明语，作为标题补充，保持简洁。",
+      "source_text": "可以在下列情况使用 个人学习、研究。 拷贝模板中的内容用于其它幻灯片母版中使用。"
+    },
+    "slide_32_title": {
+      "slide_ref": "slide_32",
+      "role": "title",
+      "max_chars": 32,
+      "instruction": "本页主标题，建议简短有力，突出主题。",
+      "source_text": "不可以在以下情况使用 任何形式的在线付费下载。 网络转载、线上线下传播。"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+    "rules": [
+      {
+        "source_prefix": "产品部",
+        "target_root": "/data/9goo-nas/部门/07产品部"
+      },
+      {
+        "source_prefix": "机械设计部",
+        "target_root": "/data/9goo-nas/部门/02南京研发中心/001-机械专业"
+      },
+      {
+        "source_prefix": "软件部",
+        "target_root": "/data/9goo-nas/部门/02南京研发中心/003-系统及软件专业"
+      },
+      {
+        "source_prefix": "生产部",
+        "target_root": "/data/9goo-nas/部门/02南京研发中心/006-生产制造专业"
+      },
+      {
+        "source_prefix": "质量部",
+        "target_root": "/data/9goo-nas/部门/02南京研发中心/011-质量部"
+      }
+    ]
+  }
